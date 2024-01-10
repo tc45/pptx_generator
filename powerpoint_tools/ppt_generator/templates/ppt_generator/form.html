@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 contenteditable="{{ user.is_superuser }}">PowerPoint Generator</h1>
+    <p contenteditable="{{ user.is_superuser }}">Editable description for admins...</p>
+
+    <form method="post" id="pptxForm">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="markupInput">Markup Input</label>
+            <!-- Integration of a standard open-source library for Markup editing -->
+            <textarea id="markupInput" class="form-control" name="markup"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="outputPath">Save Output As</label>
+            <input type="text" class="form-control" id="outputPath" name="output_path" placeholder="Enter filename (e.g., presentation.pptx)">
+        </div>
+        <button type="submit" class="btn btn-primary">Save</button>
+    </form>
+</div>
+
+<!-- Script to handle form submission -->
+<script>
+    document.getElementById('pptxForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        // Code to call 'generate_pptx.py' with the input and output path
+    });
+</script>
+{% endblock %}
