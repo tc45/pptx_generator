@@ -16,11 +16,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("ppt_generator/", include("ppt_generator.urls")),
     path("theme_applier/", include("theme_applier.urls")),
-    path('martor/', include('martor.urls')),
+    path("api_utils/", include("api_utils.urls")),
+    path('mdeditor/', include('mdeditor.urls')),
     path("", include("dashboard.urls")),  # Root webpage
 ]
+
+if settings.DEBUG:
+    # static files (images, css, javascript, etc.)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

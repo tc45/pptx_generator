@@ -1,0 +1,121 @@
+{% load static %}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PowerPoint Generator</title>
+    <!-- <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> -->
+    <!-- Include mdeditor's CSS files -->
+    <link href="{% static 'mdeditor/css/editormd.min.css' %}" rel="stylesheet">
+    <link href="{% static 'mdeditor/css/editormd.preview.css' %}" rel="stylesheet">
+    <link href="{% static 'mdeditor/js/lib/codemirror/theme/blackboard.css' %}" rel="stylesheet">
+    {{  form.media }}
+</head>
+<body>
+    <script src="{% static 'mdeditor/js/jquery.min.js' %}"></script>
+    <script src="{% static 'mdeditor/js/lib/codemirror/codemirror.min.js' %}"></script>
+    <div class="container mt-4">
+        <h1 contenteditable="{{ user.is_superuser }}">PowerPoint Generator</h1>
+        <p contenteditable="{{ user.is_superuser }}">Editable description for admins...</p>
+        <form method="post" action="{% url 'save_presentation' %}" id="presentationForm">
+            {% csrf_token %}
+{#            <div class="form-group">#}
+{#                <label for="markupInput">Markup Input</label>#}
+{#                <div id="editor">#}
+{#                    <textarea id="markupInput" class="form-control" name="markup" rows="20" cols="80"></textarea>#}
+{#                </div>#}
+{#            </div>#}
+            <div class="form-group">
+                <label for="{{ form.pptx_markdown.id_for_label }}">Markup Input</label>
+{#                {{ form.pptx_markdown }}#}
+                <textarea id="markupInput" class="form-control" name="markup" rows = 20 style="height: 500px; width: 500px"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="gptModel">GPT Model</label>
+                <select id="gptModel" class="form-control" name="gpt_model">
+                    <option value="gpt-4-1106-preview">GPT-4 1106 Preview</option>
+                    <option value="gpt-4-vision-preview">GPT-4 Vision Preview</option>
+                    <option value="gpt-4">GPT-4</option>
+                    <option value="gpt-4-0314">GPT-4 0314</option>
+                    <option value="gpt-4-0613">GPT-4 0613</option>
+                    <option value="gpt-4-32k">GPT-4 32K</option>
+                    <option value="gpt-4-32k-0314">GPT-4 32K 0314</option>
+                    <option value="gpt-4-32k-0613">GPT-4 32K 0613</option>
+                    <option value="gpt-3.5-turbo" selected>GPT-3.5 Turbo</option>
+                    <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K</option>
+                    <option value="gpt-3.5-turbo-0301">GPT-3.5 Turbo 0301</option>
+                    <option value="gpt-3.5-turbo-0613">GPT-3.5 Turbo 0613</option>
+                    <option value="gpt-3.5-turbo-1106">GPT-3.5 Turbo 1106</option>
+                    <option value="gpt-3.5-turbo-16k-0613">GPT-3.5 Turbo 16K 0613</option>
+                </select>
+                <button id="enhanceBtn" class="btn btn-secondary" type="button">Enhance via GPT</button>
+            </div>
+            <div class="form-group mt-4">
+                <label for="outputPath">Output Filename</label>
+                <input type="text" class="form-control" id="outputPath" name="output_path"
+                       placeholder="Enter filename (e.g., presentation.pptx)" required>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+
+
+
+    <!-- <script src="{% static 'mdeditor/js/jquery.min.js' %}"></script> -->
+    <!-- <script src="{% static 'mdeditor/js/editormd.min.js' %}"></script> -->
+    <script src="{% static 'mdeditor/js/lib/marked.min.js' %}"></script>
+    <script src="{% static 'mdeditor/js/lib/prettify.min.js' %}"></script>
+    <script src="{% static 'mdeditor/js/lib/raphael.min.js' %}"></script>
+    <script src="{% static 'mdeditor/js/lib/underscore.min.js' %}"></script>
+    <script src="{% static 'mdeditor/js/lib/sequence-diagram.min.js' %}"></script>
+    <script src="{% static 'mdeditor/js/lib/flowchart.min.js' %}"></script>
+    <script src="{% static 'mdeditor/js/lib/jquery.flowchart.min.js' %}"></script>
+    <script src="{% static 'mdeditor/js/editormd.min.js' %}"></script>
+    <script>
+        {#$(function () {#}
+        {#    editormd.markdownToHTML("content", {#}
+        {#        emoji : true,#}
+        {#        taskList : true,#}
+        {#        tex : true,#}
+        {#        flowChart : true,#}
+        {#        sequenceDiagram : true,#}
+        {#    });#}
+        {# });#}
+
+        $(document).ready(function() {
+            // Initialize mdeditor
+            var editor = editormd("markupInput", {path: "{% static 'mdeditor/js/lib/' %}",});
+            {#var editor = editormd("markupInput")#}
+            console.log($);
+            console.log(editormd);
+            console.log(document.getElementById("markupInput"));
+            console.log(editor); // Should log the Editormd editor instance.
+            {#console.log(Object.keys(editormd.instances));#}
+
+            $('#enhanceBtn').click(function(e) {
+                e.preventDefault();
+                var markupContent = editor.getMarkdown(); // use getMarkdown() to get the content
+                var gptModel = $('#gptModel').val();
+                $.ajax({
+                    url: '{% url "gpt_enhance" %}',
+                    type: 'POST',
+                    data: {
+                        'markup': markupContent,
+                        'gpt_model': gptModel,
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(data) {
+                        // Update the markup input with enhanced content
+                        editor.setMarkdown(data.enhanced_markdown); // use setMarkdown() to update the content
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error enhancing content: ' + error);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
