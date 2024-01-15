@@ -1,0 +1,134 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}
+    Jupyter Tools
+{% endblock title %}
+
+{% block container %}
+    <div class="container mt-4">
+        <h1 contenteditable="{{ user.is_superuser }}">Jupyter Notebook Generator</h1>
+        <p contenteditable="{{ user.is_superuser }}">Editable description for admins...</p>
+
+        <div class="container mt-4">
+            <form method="post" id="presentationForm">
+                {% csrf_token %}
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <label for="markupGenerator">Input to create Markdown for Jupyter</label>
+                        <textarea id="markupGenerator" class="form-control" name="markup_gen" rows="3"></textarea>
+                        <button type="button" class="btn btn-primary" id="generateBtn">Generate Markdown</button>
+                    </div>
+                    <div>
+                        <label for="markupInput">Markup Input</label>
+                        <textarea id="markupInput" class="form-control" name="markup" rows="20" cols="80"></textarea>
+                    </div>
+                <div class="form-group">
+                    <label for="gptModel">GPT Model</label>
+                    <select id="gptModel" class="form-control" name="gpt_model">
+                        <option value="gpt-4-1106-preview">GPT-4 1106 Preview</option>
+                        <option value="gpt-4-vision-preview">GPT-4 Vision Preview</option>
+                        <option value="gpt-4" selected>GPT-4</option>
+                        <option value="gpt-4-0314">GPT-4 0314</option>
+                        <option value="gpt-4-0613">GPT-4 0613</option>
+                        <option value="gpt-4-32k">GPT-4 32K</option>
+                        <option value="gpt-4-32k-0314">GPT-4 32K 0314</option>
+                        <option value="gpt-4-32k-0613">GPT-4 32K 0613</option>
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                        <option value="gpt-3.5-turbo-16k">GPT-3.5 Turbo 16K</option>
+                        <option value="gpt-3.5-turbo-0301">GPT-3.5 Turbo 0301</option>
+                        <option value="gpt-3.5-turbo-0613">GPT-3.5 Turbo 0613</option>
+                        <option value="gpt-3.5-turbo-1106">GPT-3.5 Turbo 1106</option>
+                        <option value="gpt-3.5-turbo-16k-0613">GPT-3.5 Turbo 16K 0613</option>
+                    </select>
+                    <input type="checkbox" id="allModels" name="all_models">
+                    <label for="allModels">All models</label>
+                    <button id="enhanceBtn" class="btn btn-secondary" type="button">Enhance via GPT</button>
+                    <br><br>
+                    <div class="form-group">
+                        <label for="outputPath">Save Output As</label>
+                        <input type="text" class="form-control" id="outputPath" name="output_path"
+                               placeholder="Enter filename (e.g., notebook.ipynb)" required>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Event handler for the allModels checkbox
+            $("#allModels").change(function() {
+                if (this.checked) {
+                    $('#gptModel').attr('disabled', 'disabled');
+                } else {
+                    $('#gptModel').removeAttr('disabled');
+                }
+            });
+            // Event handler for the Generate Markdown button
+            $("#generateBtn").click(function(e) {
+                e.preventDefault();
+                var userinput = $('#markupGenerator').val();
+                var gptModel = $('#allModels').prop('checked') ? "all" : $('#gptModel').val();
+                $.ajax({
+                    url: "{% url 'gpt_input_prompt' %}",
+                    type: 'POST',
+                    data: {
+                        'userInput': userinput,
+                        'gpt_model': gptModel,
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(data) {
+                        $('#markupInput').val(data.enhanced_markdown);
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error generating markdown: ' + error);
+                    }
+                });
+            });
+            // Event handler for the Enhance via GPT button
+            $("#enhanceBtn").click(function(e) {
+                e.preventDefault();
+                var markupContent = $('#markupInput').val();
+                var gptModel = $('#gptModel').val();
+                $.ajax({
+                    url: "{% url 'gpt_enhance' %}",
+                    type: 'POST',
+                    data: {
+                        'markup': markupContent,
+                        'gpt_model': gptModel,
+                        'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+                    },
+                    success: function(data) {
+                        // Update the markup input with enhanced content
+                        $('#markupInput').val(data.enhanced_markdown);
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle errors
+                        alert('Error enhancing content: ' + error);
+                    }
+                });
+            });
+            // Event handler for form submission
+            $("#presentationForm").submit(function(event) {
+                event.preventDefault(); // Prevent the form from being submitted normally
+
+                var formData = new FormData(this); // Create a FormData object from the form
+
+                $.ajax({
+                    url: "{% url 'save_presentation' %}",
+                    type: 'POST',
+                    data: formData,
+                    processData: false,  // important when sending FormData with jQuery
+                    contentType: false,  // important when sending FormData with jQuery
+                    success: function(data) {
+                        alert('Presentation saved successfully!');
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error saving presentation: ' + error);
+                    }
+                });
+            });
+        })
+    </script>
+{% endblock container %}

@@ -1,0 +1,27 @@
+image: docker:latest
+
+services:
+- docker:dind
+
+stages:
+  - build
+  - test
+
+variables:
+  DOCKER_DRIVER: overlay
+  DOCKER_TLS_CERTDIR: "/certs"
+  CI_REGISTRY_IMAGE: gitlab.com/tcurtis45/ai_file_gen
+  CI_COMMIT_REF_SLUG: latest
+
+build:
+  stage: build
+  script:
+    - docker build -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
+test:
+  stage: test
+  script:
+    - docker run -d $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+    - docker exec $(docker ps -q) python manage.py test
