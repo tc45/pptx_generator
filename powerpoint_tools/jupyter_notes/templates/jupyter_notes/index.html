@@ -1,16 +1,12 @@
-{% load static %}
+{% extends 'dashboard/base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>PowerPoint Generator</title>
-    <!-- Include jQuery, required for the AJAX functionality -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-</head>
-<body>
+{% block title %}
+    Jupyter Notebook Tools
+{% endblock title %}
+
+{% block container %}
     <div class="container mt-4">
-        <h1 contenteditable="{{ user.is_superuser }}">PowerPoint Generator</h1>
+        <h1 contenteditable="{{ user.is_superuser }}">Jupyter Notebook Generator</h1>
         <p contenteditable="{{ user.is_superuser }}">Editable description for admins...</p>
 
         <div class="container mt-4">
@@ -18,14 +14,14 @@
                 {% csrf_token %}
                 <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                     <div>
-                        <label for="markupGenerator">Input for Markdown Generator</label>
-                        <textarea id="markupGenerator" class="form-control" name="markup_gen" rows="3"></textarea>
-                        <button type="button" class="btn btn-primary" id="generateBtn">Generate Markdown</button>
-                    </div>
+                        <label for="markupGenerator">Input to create Markdown for Jupyter</label>
+                        <textarea id="markupGenerator" class="form-control" name="markup_gen" rows="3" cols="80"></textarea>
+                        <button type="button" class="btn btn-primary" id="generateBtn" >Generate Markdown</button>
+                    </div><br><br>
                     <div>
-                        <label for="markupInput">Markup Input</label>
-                        <textarea id="markupInput" class="form-control" name="markup" rows="20" cols="80"></textarea>
-                    </div>
+                        <label for="markupInput">Markup Input</label><br>
+                        <textarea id="markupInput" class="form-control" name="markup" rows="15" cols="80"></textarea>
+                    </div><br>
                 <div class="form-group">
                     <label for="gptModel">GPT Model</label>
                     <select id="gptModel" class="form-control" name="gpt_model">
@@ -51,15 +47,16 @@
                     <div class="form-group">
                         <label for="outputPath">Save Output As</label>
                         <input type="text" class="form-control" id="outputPath" name="output_path"
-                               placeholder="Enter filename (e.g., presentation.pptx)" required>
+                               placeholder="Enter filename (e.g., notebook.ipynb)" required>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </div>
-
                 </div>
             </form>
         </div>
     </div>
+{% endblock container %}
 
+{% block script %}
     <script>
         $(document).ready(function() {
             // Event handler for the allModels checkbox
@@ -121,20 +118,19 @@
                 var formData = new FormData(this); // Create a FormData object from the form
 
                 $.ajax({
-                    url: "{% url 'save_presentation' %}",
+                    url: "{% url 'jupyter_note' %}",
                     type: 'POST',
                     data: formData,
                     processData: false,  // important when sending FormData with jQuery
                     contentType: false,  // important when sending FormData with jQuery
                     success: function(data) {
-                        alert('Presentation saved successfully!');
+                        alert('Jupyter notebook successfully!');
                     },
                     error: function(xhr, status, error) {
-                        alert('Error saving presentation: ' + error);
+                        alert('Error saving Jupyter notebook: ' + error);
                     }
                 });
             });
         })
     </script>
-</body>
-</html>
+{% endblock script %}

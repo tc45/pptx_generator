@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "ppt_generator",
     "theme_applier",
     "api_utils",
+    "jupyter_notes",
     "mdeditor",
 ]
 
@@ -130,7 +131,24 @@ USE_I18N = True
 
 USE_TZ = True
 
+# Enable rich logging
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"rich": {"datefmt": "[%X:%f]"}},
+    "handlers": {
+        "console": {
+            "class": "rich.logging.RichHandler",
+            "formatter": "rich",
+            "level": "DEBUG",
+        }
+    },
 
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'WARNING'},
+        '': {'handlers': ['console'], 'level': 'INFO'},
+    },
+}
 
 # MDEditor Configuration for markdown
 

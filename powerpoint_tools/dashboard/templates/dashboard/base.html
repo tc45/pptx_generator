@@ -1,0 +1,49 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <!-- Include jQuery, required for the AJAX functionality -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .navbar {
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container">
+            <a class="navbar-brand" href="/">Ai Generation Tools</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ppt_generator/">PowerPoint</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/jupyter_notes/">Jupyter Notebooks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/theme_applier/">Theme Applier</a>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    {% block welcome %}{% endblock welcome %}
+    {% block container %}{% endblock container %}
+
+    <!-- Bootstrap JS, Popper.js, and jQuery -->
+{#    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>#}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    {% block script %}{% endblock script %}
+</body>
+</html>

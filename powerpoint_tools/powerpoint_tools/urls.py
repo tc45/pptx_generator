@@ -23,6 +23,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("ppt_generator/", include("ppt_generator.urls")),
     path("theme_applier/", include("theme_applier.urls")),
+    path("jupyter_notes/", include("jupyter_notes.urls")),
     path("api_utils/", include("api_utils.urls")),
     path('mdeditor/', include('mdeditor.urls')),
     path("", include("dashboard.urls")),  # Root webpage
